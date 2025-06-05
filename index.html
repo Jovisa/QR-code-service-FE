@@ -1,108 +1,144 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
+  <head>
+    <meta charset="UTF-8" />
     <title>QR Code Generator</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <!-- Bootstrap CSS CDN -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
     <style>
-        body {
-            background-color: #f8f9fa;
-        }
+      body {
+        background-color: #f8f9fa;
+      }
 
-        .qr-container {
-            max-width: 500px;
-            margin: 60px auto;
-            padding: 30px;
-            border-radius: 15px;
-            background-color: #ffffff;
-            box-shadow: 0 0 30px rgba(0, 0, 0, 0.1);
-        }
+      .qr-container {
+        max-width: 500px;
+        margin: 60px auto;
+        padding: 30px;
+        border-radius: 15px;
+        background-color: #ffffff;
+        box-shadow: 0 0 30px rgba(0, 0, 0, 0.1);
+      }
 
-        img {
-            margin-top: 20px;
-            max-width: 100%;
-        }
+      img {
+        margin-top: 20px;
+        max-width: 100%;
+      }
     </style>
-</head>
-<body>
-    <div class="container qr-container">
-        <h2 class="text-center mb-4">QR Code Generator</h2>
+  </head>
+  <body>
+    <div class="container qr-container needs-validation">
+      <h2 class="text-center mb-4">QR Code Generator</h2>
 
-        <div class="mb-3">
-            <input type="text" id="contents" class="form-control" placeholder="Enter text">
-        </div>
+      <div class="mb-3">
+        <input
+          type="text"
+          id="contents"
+          class="form-control"
+          placeholder="Enter text"
+          required
+        />
+        <div class="invalid-feedback">Please enter some text.</div>
+      </div>
 
-        <div class="mb-3">
-            <input type="number" id="size" class="form-control" value="250" placeholder="Size (px)">
-        </div>
+      <div class="mb-3">
+        <input
+          type="number"
+          id="size"
+          class="form-control"
+          value="250"
+          min="150"
+          max="350"
+        />
+      </div>
 
-        <div class="mb-3">
-            <select id="correction" class="form-select">
-                <option value="L">Low</option>
-                <option value="M">Medium</option>
-                <option value="Q">Quartile</option>
-                <option value="H">High</option>
-            </select>
-        </div>
+      <div class="mb-3">
+        <select id="correction" class="form-select">
+          <option value="L">Low</option>
+          <option value="M">Medium</option>
+          <option value="Q">Quartile</option>
+          <option value="H">High</option>
+        </select>
+      </div>
 
-        <div class="mb-3">
-            <select id="type" class="form-select">
-                <option value="png">PNG</option>
-                <option value="jpeg">JPEG</option>
-                <option value="gif">GIF</option>
-            </select>
-        </div>
+      <div class="mb-3">
+        <select id="type" class="form-select">
+          <option value="png">PNG</option>
+          <option value="jpeg">JPEG</option>
+          <option value="gif">GIF</option>
+        </select>
+      </div>
 
-        <div class="d-grid">
-            <button class="btn btn-primary" onclick="generateQRCode()">Generate QR Code</button>
-        </div>
+      <div class="d-grid">
+        <button class="btn btn-outline-primary  fs-5" onclick="generateQRCode()">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            fill="currentColor"
+            class="bi bi-qr-code"
+            viewBox="0 0 16 16"
+          >
+            <path d="M2 2h2v2H2z" />
+            <path d="M6 0v6H0V0zM5 1H1v4h4zM4 12H2v2h2z" />
+            <path d="M6 10v6H0v-6zm-5 1v4h4v-4zm11-9h2v2h-2z" />
+            <path
+              d="M10 0v6h6V0zm5 1v4h-4V1zM8 1V0h1v2H8v2H7V1zm0 5V4h1v2zM6 8V7h1V6h1v2h1V7h5v1h-4v1H7V8zm0 0v1H2V8H1v1H0V7h3v1zm10 1h-1V7h1zm-1 0h-1v2h2v-1h-1zm-4 0h2v1h-1v1h-1zm2 3v-1h-1v1h-1v1H9v1h3v-2zm0 0h3v1h-2v1h-1zm-4-1v1h1v-2H7v1z"
+            />
+            <path d="M7 12h1v3h4v1H7zm9 2v2h-3v-1h2v-1z" />
+          </svg>
+          Generate QR Code
+        </button>
+      </div>
 
-        <img id="qrImage" class="img-fluid mt-4 d-block mx-auto"  hidden>
+      <img id="qrImage" class="img-fluid mt-4 d-block mx-auto" hidden />
     </div>
 
     <!-- Bootstrap JS (optional, for components like modals etc.) -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-
     <script>
-        async function generateQRCode() {
-            const contents = document.getElementById('contents').value.trim();
-            if (!contents) {
-                alert("Please enter some content for the QR code.");
-                return;
-            }
-    
-            const size = document.getElementById('size').value || 250;
-            const correction = document.getElementById('correction').value || "L";
-            const type = document.getElementById('type').value || "png";
-
-            const host = {
-                local: "http://localhost:9090",
-                aws: "http://13.53.198.101:9090"
-            };
-
-            const url = `${host.aws}/api/qrcode?contents=${encodeURIComponent(contents)}&size=${size}&correction=${correction}&type=${type}`;
-    
-            const img = document.getElementById('qrImage');
-
-            const ERROR_MESSAGE = "Failed to generate QR code. Please check your backend is running.";
-
-            try {
-                const response = await fetch(url);
-                if (!response.ok) throw new Error("QR code generation failed");
-    
-                const blob = await response.blob();
-                const imageUrl = URL.createObjectURL(blob);
-    
-                img.src = imageUrl;
-                img.hidden = false;
-            } catch (error) {
-                alert(ERROR_MESSAGE);
-                console.error(error);
-            }
+      async function generateQRCode() {
+        const contents = document.getElementById("contents").value.trim();
+        if (!contents) {
+          alert("Please enter some content for the QR code.");
+          return;
         }
+
+        const size = document.getElementById("size").value || 250;
+        const correction = document.getElementById("correction").value || "L";
+        const type = document.getElementById("type").value || "png";
+        const img = document.getElementById("qrImage");
+
+        const host = {
+          local: "http://localhost:9090",
+          aws: "http://13.53.198.101:9090",
+        };
+
+        const url = `${host.aws}/api/qrcode?contents=${encodeURIComponent(
+          contents
+        )}&size=${size}&correction=${correction}&type=${type}`;
+
+        const ERROR_MESSAGE =
+          "Failed to generate QR code. Please check your backend is running.";
+
+        try {
+          const response = await fetch(url);
+          if (!response.ok) throw new Error("QR code generation failed");
+
+          const blob = await response.blob();
+          const imageUrl = URL.createObjectURL(blob);
+
+          img.src = imageUrl;
+          img.hidden = false;
+        } catch (error) {
+          alert(ERROR_MESSAGE);
+          console.error(error);
+        }
+      }
     </script>
-</body>
+  </body>
 </html>
